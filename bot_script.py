@@ -1,26 +1,26 @@
 import os
 import pandas as pd
-from ntwitter import Api
+import tweepy
+
+# إعداد تويتر v2
+client = tweepy.Client(
+    consumer_key=os.environ.get("TWITTER_API_KEY"),
+    consumer_secret=os.environ.get("TWITTER_API_SECRET"),
+    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
+    access_token_secret=os.environ.get("TWITTER_ACCESS_SECRET")
+)
 
 def start_bot():
     try:
-        # بيانات الدخول العادية
-        username = os.environ.get("TW_USER")
-        password = os.environ.get("TW_PASS")
-
-        print("🌐 Connecting to Twitter...")
-        # تسجيل الدخول
-        api = Api()
-        api.login(username, password)
-        
-        # قراءة الرابط
+        # قراءة الداتا
         df = pd.read_csv('products.csv')
         link = df['url'].iloc[0]
-        text = f"Flash Deal! 🔥\n{link}"
+        tweet_text = f"Amazing Deal! 🔥\n{link}"
 
+        print("🚀 Posting to X...")
         # النشر
-        api.tweet(text)
-        print("✅ FINALLY! The bot posted successfully.")
+        client.create_tweet(text=tweet_text)
+        print("✅ SUCCESS! Finally posted.")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")

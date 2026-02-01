@@ -1,26 +1,16 @@
 import os
 import pandas as pd
-import google.generativeai as genai
+from openai import OpenAI # دي ميزة ديب سيك، بيشتغل بمكتبة OpenAI
 import tweepy
 
-# 1. إعداد جيميناي
-genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-
-def find_working_model():
-    # بنلف على كل الموديلات اللي جوجل مدياها لك
-    for m in genai.list_models():
-        if 'generateContent' in m.supported_generation_methods:
-            # بنبعد عن الموديلات اللي فيها "vision" أو "embedding"
-            if 'flash' in m.name:
-                return m.name
-    return 'models/gemini-1.5-flash' # لو ملقتش حاجة خالص ارجع للاحتياطي
-
-working_model_name = find_working_model()
-model = genai.GenerativeModel(working_model_name)
-print(f"✅ Selected Model: {working_model_name}")
+# 1. إعداد DeepSeek (الذكي جداً والمجاني حالياً)
+client_ai = OpenAI(
+    api_key=os.environ.get("DEEPSEEK_API_KEY"),
+    base_url="https://api.deepseek.com" # ده العنوان اللي بيشغله
+)
 
 # 2. إعداد تويتر
-client = tweepy.Client(
+client_twitter = tweepy.Client(
     consumer_key=os.environ.get("TWITTER_API_KEY"),
     consumer_secret=os.environ.get("TWITTER_API_SECRET"),
     access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
@@ -32,19 +22,21 @@ def start_bot():
         df = pd.read_csv('products.csv')
         product_link = df['url'].iloc[0] 
         
-        prompt = f"Create a short, catchy tweet for this product: {product_link}. Use 2 emojis. Max 200 chars."
+        # طلب التويتة من DeepSeek
+        response = client_ai.chat.completions.create(
+            model="deepseek-chat", # ده أحدث موديل محادثة عندهم
+            messages=[
+                {"role": "system", "content": "You are an expert affiliate marketer who writes professional, high-conversion tweets."},
+                {"role": "user", "content": f"Create a short, exciting tweet for this link: {product_link}. Use 2 emojis and hashtags. Make it look professional."}
+            ],
+            stream=False
+        )
         
-        response = model.generate_content(prompt)
+        tweet_text = response.choices[0].message.content.strip()
         
-        if response.text:
-            tweet_text = response.text.strip()
-            print(f"🚀 Sending to Twitter via {working_model_name}...")
-            post = client.create_tweet(text=tweet_text)
-            
-            if post.data and 'id' in post.data:
-                print(f"✅ Success! Tweet ID: {post.data['id']}")
-        else:
-            print("⚠️ Gemini response was empty.")
+        print(f"🚀 Sending to Twitter via DeepSeek...")
+        post = client_twitter.create_tweet(text=tweet_text)
+        print(f"✅ Success! ID: {post.data['id']}")
 
     except Exception as e:
         print(f"❌ Error Detail: {str(e)}")

@@ -20,11 +20,11 @@ model = genai.GenerativeModel(latest_model_name)
 
 # إعدادات تويتر
 client = tweepy.Client(
-    bearer_token=os.environ["TWITTER_BEARER_TOKEN"],
     consumer_key=os.environ["TWITTER_API_KEY"],
     consumer_secret=os.environ["TWITTER_API_SECRET"],
     access_token=os.environ["TWITTER_ACCESS_TOKEN"],
     access_token_secret=os.environ["TWITTER_ACCESS_SECRET"]
+)
 )
 
 def start_bot():
@@ -45,3 +45,4 @@ def start_bot():
 
 if __name__ == "__main__":
     start_bot()
+

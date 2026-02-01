@@ -1,1 +1,27 @@
-run: run: pip install twitter-api-client pandas
+name: Twitter Bot
+
+on:
+  workflow_dispatch: # عشان يظهر لك زرار Run workflow
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: '3.9'
+
+      - name: Install dependencies
+        run: |
+          pip install pandas twitter-api-client
+
+      - name: Run bot
+        env:
+          TW_USER: ${{ secrets.TW_USER }}
+          TW_PASS: ${{ secrets.TW_PASS }}
+          TW_EMAIL: ${{ secrets.TW_EMAIL }}
+        run: python bot_script.py

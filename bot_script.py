@@ -1,26 +1,26 @@
 import os
 import pandas as pd
-from tweepy_self import Client
+from ntwitter import Api
 
 def start_bot():
     try:
-        # بياناتك من السيكرتس
+        # بيانات الدخول العادية
         username = os.environ.get("TW_USER")
         password = os.environ.get("TW_PASS")
 
-        print("🌐 Simulating login...")
-        # تسجيل دخول بالحساب العادي
-        client = Client()
-        client.login(username=username, password=password)
+        print("🌐 Connecting to Twitter...")
+        # تسجيل الدخول
+        api = Api()
+        api.login(username, password)
         
-        # قراءة الداتا
+        # قراءة الرابط
         df = pd.read_csv('products.csv')
-        product_url = df['url'].iloc[0]
-        tweet_text = f"Check this deal! 🔥\n{product_url}"
+        link = df['url'].iloc[0]
+        text = f"Flash Deal! 🔥\n{link}"
 
         # النشر
-        client.tweet(tweet_text)
-        print("✅ SUCCESS! Finally bypassed the 402 error!")
+        api.tweet(text)
+        print("✅ FINALLY! The bot posted successfully.")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")

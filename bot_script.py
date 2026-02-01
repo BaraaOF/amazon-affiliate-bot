@@ -6,9 +6,18 @@ import tweepy
 # 1. إعداد جيميناي
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# الاسم البرمجي الصحيح لـ Gemini 3 Flash في الخطة المجانية
-MODEL_NAME = 'models/gemini-3-flash' 
-model = genai.GenerativeModel(MODEL_NAME)
+def find_working_model():
+    # بنلف على كل الموديلات اللي جوجل مدياها لك
+    for m in genai.list_models():
+        if 'generateContent' in m.supported_generation_methods:
+            # بنبعد عن الموديلات اللي فيها "vision" أو "embedding"
+            if 'flash' in m.name:
+                return m.name
+    return 'models/gemini-1.5-flash' # لو ملقتش حاجة خالص ارجع للاحتياطي
+
+working_model_name = find_working_model()
+model = genai.GenerativeModel(working_model_name)
+print(f"✅ Selected Model: {working_model_name}")
 
 # 2. إعداد تويتر
 client = tweepy.Client(
@@ -23,18 +32,19 @@ def start_bot():
         df = pd.read_csv('products.csv')
         product_link = df['url'].iloc[0] 
         
-        # برومبت بسيط عشان مياخدش توكنز كتير
-        prompt = f"Short cool tweet for: {product_link}. 2 emojis."
+        prompt = f"Create a short, catchy tweet for this product: {product_link}. Use 2 emojis. Max 200 chars."
         
         response = model.generate_content(prompt)
         
         if response.text:
             tweet_text = response.text.strip()
-            print(f"🚀 Trying to post with Gemini 3 Flash...")
+            print(f"🚀 Sending to Twitter via {working_model_name}...")
             post = client.create_tweet(text=tweet_text)
-            print(f"✅ Success! ID: {post.data['id']}")
+            
+            if post.data and 'id' in post.data:
+                print(f"✅ Success! Tweet ID: {post.data['id']}")
         else:
-            print("⚠️ Empty response")
+            print("⚠️ Gemini response was empty.")
 
     except Exception as e:
         print(f"❌ Error Detail: {str(e)}")

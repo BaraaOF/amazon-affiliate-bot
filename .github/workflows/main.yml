@@ -1,6 +1,7 @@
 name: Twitter Browser Bot
+
 on:
-  workflow_dispatch:
+  workflow_dispatch: # عشان تشغله يدوي براحتك
 
 jobs:
   build:
@@ -14,11 +15,14 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install Selenium & Chrome
+      - name: Install Dependencies
         run: |
-          pip install pandas selenium undetected-chromedriver webdriver-manager
-          sudo apt-get update
-          sudo apt-get install -y google-chrome-stable
+          pip install pandas selenium webdriver-manager
+          
+      - name: Install Google Chrome
+        run: |
+          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
+          sudo apt install ./google-chrome-stable_current_amd64.deb
 
       - name: Run bot
         env:

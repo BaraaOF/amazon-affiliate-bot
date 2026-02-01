@@ -1,31 +1,30 @@
 import os
 import pandas as pd
-import tweepy
-
-# إعداد تويتر v2 (المسموح به فقط في الحسابات المجانية حالياً)
-client = tweepy.Client(
-    consumer_key=os.environ.get("TWITTER_API_KEY"),
-    consumer_secret=os.environ.get("TWITTER_API_SECRET"),
-    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
-    access_token_secret=os.environ.get("TWITTER_ACCESS_SECRET")
-)
+from twitter_api_client import Twitter
+import time
 
 def start_bot():
     try:
-        # قراءة البيانات
-        df = pd.read_csv('products.csv')
-        product_url = df['url'].iloc[0]
-        tweet_text = f"Great Deal found! 🔥\n\n{product_url}"
+        # بيانات الدخول من السيكرتس
+        email = os.environ.get("TW_EMAIL")
+        username = os.environ.get("TW_USER")
+        password = os.environ.get("TW_PASS")
 
-        print("🚀 Posting to X (v2)...")
-        # النشر بأبسط طريقة
-        response = client.create_tweet(text=tweet_text)
-        
-        if response.data:
-            print(f"✅ FINALLY! Posted ID: {response.data['id']}")
+        # فتح الحساب (كأنه متصفح)
+        twitter = Twitter()
+        twitter.account.login(username, password, email)
+
+        # قراءة الرابط
+        df = pd.read_csv('products.csv')
+        link = df['url'].iloc[0]
+        text = f"Don't miss this deal! 🔥\n{link}"
+
+        # النشر
+        twitter.account.tweet(text)
+        print("✅ SUCCESS! Posted via Browser Simulation (Free).")
 
     except Exception as e:
-        print(f"❌ Error Detail: {str(e)}")
+        print(f"❌ Error: {str(e)}")
 
 if __name__ == "__main__":
     start_bot()

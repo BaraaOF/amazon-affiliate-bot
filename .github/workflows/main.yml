@@ -30,3 +30,12 @@ jobs:
           TW_PASS: ${{ secrets.TW_PASS }}
           TW_EMAIL: ${{ secrets.TW_EMAIL }}
         run: python bot_script.py
+
+      - name: Upload Debug Files
+        if: always() # السطر ده بيخليه يرفع الصورة حتى لو البوت فشل
+        uses: actions/upload-artifact@v4
+        with:
+          name: debug-files
+          path: |
+            error_log.png
+            page_source.html

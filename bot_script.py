@@ -1,15 +1,16 @@
 import os
 import pandas as pd
-from openai import OpenAI # دي ميزة ديب سيك، بيشتغل بمكتبة OpenAI
+from huggingface_hub import InferenceClient
 import tweepy
 
-# 1. إعداد DeepSeek (الذكي جداً والمجاني حالياً)
-client_ai = OpenAI(
-    api_key=os.environ.get("DEEPSEEK_API_KEY"),
-    base_url="https://api.deepseek.com" # ده العنوان اللي بيشغله
+# 1. إعداد هجينج فيس (المجاني الحقيقي)
+# الموديل ده ذكي جداً وقوي في الروابط
+client_ai = InferenceClient(
+    "Qwen/Qwen2.5-72B-Instruct",
+    token=os.environ.get("HF_TOKEN")
 )
 
-# 2. إعداد تويتر
+# 2. إعداد تويتر (زي ما هي)
 client_twitter = tweepy.Client(
     consumer_key=os.environ.get("TWITTER_API_KEY"),
     consumer_secret=os.environ.get("TWITTER_API_SECRET"),
@@ -22,21 +23,19 @@ def start_bot():
         df = pd.read_csv('products.csv')
         product_link = df['url'].iloc[0] 
         
-        # طلب التويتة من DeepSeek
-        response = client_ai.chat.completions.create(
-            model="deepseek-chat", # ده أحدث موديل محادثة عندهم
-            messages=[
-                {"role": "system", "content": "You are an expert affiliate marketer who writes professional, high-conversion tweets."},
-                {"role": "user", "content": f"Create a short, exciting tweet for this link: {product_link}. Use 2 emojis and hashtags. Make it look professional."}
-            ],
-            stream=False
+        # طلب التويتة
+        prompt = f"Write a professional short tweet for this product: {product_link}. Use 2 emojis. Max 200 chars."
+        
+        response = client_ai.chat_completion(
+            messages=[{"role": "user", "content": prompt}],
+            max_tokens=200
         )
         
         tweet_text = response.choices[0].message.content.strip()
         
-        print(f"🚀 Sending to Twitter via DeepSeek...")
+        print(f"🚀 Sending to Twitter via Hugging Face...")
         post = client_twitter.create_tweet(text=tweet_text)
-        print(f"✅ Success! ID: {post.data['id']}")
+        print(f"✅ Success! Tweet ID: {post.data['id']}")
 
     except Exception as e:
         print(f"❌ Error Detail: {str(e)}")

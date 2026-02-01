@@ -2,32 +2,29 @@ import os
 import pandas as pd
 import tweepy
 
-# إعدادات تويتر باستخدام OAuth 1.0a (دي اللي لسه مجانية بجد)
-auth = tweepy.OAuth1UserHandler(
-    os.environ.get("TWITTER_API_KEY"),
-    os.environ.get("TWITTER_API_SECRET"),
-    os.environ.get("TWITTER_ACCESS_TOKEN"),
-    os.environ.get("TWITTER_ACCESS_SECRET")
+# إعداد تويتر v2 (المسموح به فقط في الحسابات المجانية حالياً)
+client = tweepy.Client(
+    consumer_key=os.environ.get("TWITTER_API_KEY"),
+    consumer_secret=os.environ.get("TWITTER_API_SECRET"),
+    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
+    access_token_secret=os.environ.get("TWITTER_ACCESS_SECRET")
 )
-api = tweepy.API(auth)
 
 def start_bot():
     try:
-        # قراءة الرابط
+        # قراءة البيانات
         df = pd.read_csv('products.csv')
         product_url = df['url'].iloc[0]
-        tweet_text = f"Amazing Tech Deal! 🔥✨ \n\n{product_url} \n\n#Tech #Deals"
+        tweet_text = f"Great Deal found! 🔥\n\n{product_url}"
 
-        print(f"🚀 Attempting to post via API v1.1...")
+        print("🚀 Posting to X (v2)...")
+        # النشر بأبسط طريقة
+        response = client.create_tweet(text=tweet_text)
         
-        # النشر بالطريقة القديمة المضمونة
-        post = api.update_status(status=tweet_text)
-        
-        print(f"✅ FINALLY! Posted successfully. ID: {post.id}")
+        if response.data:
+            print(f"✅ FINALLY! Posted ID: {response.data['id']}")
 
     except Exception as e:
-        # لو جاب 403 يبقى محتاجين نفتح الصلاحيات من الـ Dashboard
-        # لو جاب 402 يبقى حسابك فعلا محظور تجاريا ومحتاج حساب جديد
         print(f"❌ Error Detail: {str(e)}")
 
 if __name__ == "__main__":

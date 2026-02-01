@@ -5,7 +5,7 @@ import tweepy
 
 # إعدادات جيميناي وتويتر (زي ما عملنا في الـ Secrets)
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-model = genai.GenerativeModel('gemini-pro')
+model = genai.GenerativeModel('gemini-1.5-flash')
 
 client = tweepy.Client(
     bearer_token=os.environ["TWITTER_BEARER_TOKEN"],
@@ -32,4 +32,5 @@ def start_bot():
     print(f"Success! Posted: {tweet_text}")
 
 if __name__ == "__main__":
+
     start_bot()

@@ -1,23 +1,34 @@
 import os
 import pandas as pd
-import ntwt # مكتبة للنشر المجاني بدون API Key رخم
+import tweepy
+
+# إعدادات تويتر باستخدام OAuth 1.0a (دي اللي لسه مجانية بجد)
+auth = tweepy.OAuth1UserHandler(
+    os.environ.get("TWITTER_API_KEY"),
+    os.environ.get("TWITTER_API_SECRET"),
+    os.environ.get("TWITTER_ACCESS_TOKEN"),
+    os.environ.get("TWITTER_ACCESS_SECRET")
+)
+api = tweepy.API(auth)
 
 def start_bot():
     try:
-        # قرأنا اللينك
+        # قراءة الرابط
         df = pd.read_csv('products.csv')
         product_url = df['url'].iloc[0]
-        tweet_text = f"Amazing Tech Deal! 🔥\n{product_url}"
+        tweet_text = f"Amazing Tech Deal! 🔥✨ \n\n{product_url} \n\n#Tech #Deals"
 
-        # النشر باستخدام اسم المستخدم وكلمة السر مباشرة (زي الموبايل)
-        # ملحوظة: هتحتاج تحط بياناتك في الـ Secrets
-        client = ntwt.Account(username=os.environ["TW_USER"], password=os.environ["TW_PASS"])
-        client.tweet(tweet_text)
+        print(f"🚀 Attempting to post via API v1.1...")
         
-        print("✅ DONE! Posted without paying a cent to Elon Musk!")
+        # النشر بالطريقة القديمة المضمونة
+        post = api.update_status(status=tweet_text)
+        
+        print(f"✅ FINALLY! Posted successfully. ID: {post.id}")
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        # لو جاب 403 يبقى محتاجين نفتح الصلاحيات من الـ Dashboard
+        # لو جاب 402 يبقى حسابك فعلا محظور تجاريا ومحتاج حساب جديد
+        print(f"❌ Error Detail: {str(e)}")
 
 if __name__ == "__main__":
     start_bot()

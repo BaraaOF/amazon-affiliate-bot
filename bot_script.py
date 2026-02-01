@@ -18,58 +18,61 @@ def start_bot():
         chrome_options.add_argument('--no-sandbox')
         chrome_options.add_argument('--disable-dev-shm-usage')
         chrome_options.add_argument("--window-size=1920,1080")
-        # إضافة User-Agent عشان تويتر ميشكش إننا بوت
-        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36')
+        chrome_options.add_argument('--user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36')
 
-        print("🔧 Setting up ChromeDriver...")
         service = Service(ChromeDriverManager().install())
         driver = webdriver.Chrome(service=service, options=chrome_options)
-        
-        print("🌐 Opening Twitter login page...")
-        driver.get("https://x.com/i/flow/login")
-        
-        # انتظار ذكي لحد ما خانة اليوزر تظهر (بحد أقصى 20 ثانية)
         wait = WebDriverWait(driver, 20)
         
-        print("🔑 Entering Username...")
-        user_field = wait.until(EC.presence_of_element_located((By.XPATH, "//input[@autocomplete='username']|//input[@name='text']")))
+        print("🌐 Opening Login Page...")
+        driver.get("https://x.com/i/flow/login")
+        
+        # 1. اليوزر
+        print("🔑 Step 1: Username...")
+        user_field = wait.until(EC.presence_of_element_located((By.NAME, "text")))
         user_field.send_keys(os.environ.get("TW_USER"))
         user_field.send_keys(Keys.ENTER)
-        
-        print("🔑 Entering Password...")
-        # انتظار خانة الباسورد تظهر
+        time.sleep(3)
+
+        # فحص لو طلب تأكيد إيميل أو يوزر نيم إضافي
+        try:
+            extra_check = driver.find_elements(By.NAME, "text")
+            if extra_check:
+                print("⚠️ Verification screen detected!")
+                extra_check[0].send_keys(os.environ.get("TW_EMAIL"))
+                extra_check[0].send_keys(Keys.ENTER)
+                time.sleep(3)
+        except:
+            pass
+
+        # 2. الباسورد
+        print("🔑 Step 2: Password...")
         pass_field = wait.until(EC.presence_of_element_located((By.NAME, "password")))
         pass_field.send_keys(os.environ.get("TW_PASS"))
         pass_field.send_keys(Keys.ENTER)
         time.sleep(10)
 
-        print("📝 Preparing Tweet content...")
+        # 3. قراءة الداتا من CSV
         df = pd.read_csv('products.csv')
-        tweet_text = f"Amazing Deal! 🔥✨\n\n{df['url'].iloc[0]}"
+        tweet_text = f"Amazing Deal! 🔥\n{df['url'].iloc[0]}"
         
-        # الذهاب لصفحة النشر مباشرة
+        # 4. النشر
         driver.get(f"https://x.com/intent/tweet?text={tweet_text}")
-        
-        print("🚀 Clicking Tweet button...")
-        # انتظار زرار التغريد يظهر
+        print("🚀 Final Step: Tweeting...")
         tweet_button = wait.until(EC.element_to_be_clickable((By.XPATH, "//div[@data-testid='tweetButtonInline']")))
         tweet_button.click()
         
-        print("✅ SUCCESS! Tweet posted successfully.")
+        print("✅ SUCCESS!")
         time.sleep(5)
 
     except Exception as e:
-        print(f"❌ Error encountered: {str(e)}")
+        print(f"❌ Error: {str(e)}")
         if driver:
-            print("📸 Saving error screenshot for diagnosis...")
             driver.save_screenshot("error_log.png")
-            # هنطبع كود الصفحة عشان نعرف تويتر عرض إيه
             with open("page_source.html", "w", encoding='utf-8') as f:
                 f.write(driver.page_source)
     finally:
-        if driver:
-            print("🔒 Closing browser.")
-            driver.quit()
+        if driver: driver.quit()
 
 if __name__ == "__main__":
     start_bot()

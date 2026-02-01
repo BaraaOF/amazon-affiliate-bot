@@ -16,8 +16,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: |
-          pip install pandas ntwitter
+        run: pip install pandas tweepy
       - name: Run bot
         env:
           TW_USER: ${{ secrets.TW_USER }}

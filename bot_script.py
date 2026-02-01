@@ -6,11 +6,11 @@ import tweepy
 # 1. إعداد جيميناي
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-# استخدم الاسم ده بالظبط زي ما ظهر في صورتك
-MODEL_NAME = 'gemini-2.5-flash' 
+# الاسم البرمجي الصحيح لـ Gemini 3 Flash في الخطة المجانية
+MODEL_NAME = 'models/gemini-3-flash' 
 model = genai.GenerativeModel(MODEL_NAME)
 
-# 2. إعداد تويتر (X)
+# 2. إعداد تويتر
 client = tweepy.Client(
     consumer_key=os.environ.get("TWITTER_API_KEY"),
     consumer_secret=os.environ.get("TWITTER_API_SECRET"),
@@ -20,28 +20,23 @@ client = tweepy.Client(
 
 def start_bot():
     try:
-        # قراءة الروابط
         df = pd.read_csv('products.csv')
         product_link = df['url'].iloc[0] 
         
-        # طلب المحتوى
-        prompt = f"Write a professional short tweet for this deal: {product_link}. Use 2 emojis. Max 200 chars."
+        # برومبت بسيط عشان مياخدش توكنز كتير
+        prompt = f"Short cool tweet for: {product_link}. 2 emojis."
         
-        # محاولة توليد المحتوى
         response = model.generate_content(prompt)
         
         if response.text:
             tweet_text = response.text.strip()
-            print(f"📡 Sending to Twitter using {MODEL_NAME}...")
+            print(f"🚀 Trying to post with Gemini 3 Flash...")
             post = client.create_tweet(text=tweet_text)
-            
-            if post.data and 'id' in post.data:
-                print(f"✅ Success! Tweet ID: {post.data['id']}")
+            print(f"✅ Success! ID: {post.data['id']}")
         else:
-            print("⚠️ Gemini response was empty.")
+            print("⚠️ Empty response")
 
     except Exception as e:
-        # لو طلع 402 تاني، هقولك تعمل إيه في الـ Settings فورا
         print(f"❌ Error Detail: {str(e)}")
 
 if __name__ == "__main__":

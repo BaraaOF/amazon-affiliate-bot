@@ -3,12 +3,14 @@ import pandas as pd
 import google.generativeai as genai
 import tweepy
 
-# 1. إعداد جيميناي بالاسم اللي انت لقيته
+# 1. إعداد جيميناي
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
-MODEL_NAME = 'gemini-3-flash-preview' 
+
+# استخدم الاسم ده بالظبط زي ما ظهر في صورتك
+MODEL_NAME = 'gemini-2.5-flash' 
 model = genai.GenerativeModel(MODEL_NAME)
 
-# 2. إعداد تويتر (X) - الطريقة المضمونة للـ Free Tier
+# 2. إعداد تويتر (X)
 client = tweepy.Client(
     consumer_key=os.environ.get("TWITTER_API_KEY"),
     consumer_secret=os.environ.get("TWITTER_API_SECRET"),
@@ -22,27 +24,24 @@ def start_bot():
         df = pd.read_csv('products.csv')
         product_link = df['url'].iloc[0] 
         
-        # طلب المحتوى من الموديل الجديد
-        prompt = f"Write a high-conversion short tweet for this deal: {product_link}. Include 2 emojis and hashtags. Max 200 chars."
+        # طلب المحتوى
+        prompt = f"Write a professional short tweet for this deal: {product_link}. Use 2 emojis. Max 200 chars."
+        
+        # محاولة توليد المحتوى
         response = model.generate_content(prompt)
         
         if response.text:
             tweet_text = response.text.strip()
-            
-            # محاولة النشر مع طباعة النتيجة فوراً
-            print(f"📡 Sending to Twitter via {MODEL_NAME}...")
+            print(f"📡 Sending to Twitter using {MODEL_NAME}...")
             post = client.create_tweet(text=tweet_text)
             
-            # التأكد من وجود ID للتويتة
             if post.data and 'id' in post.data:
-                print(f"✅ Success! Tweet published with ID: {post.data['id']}")
-            else:
-                print("⚠️ Tweet was sent but no ID was returned.")
+                print(f"✅ Success! Tweet ID: {post.data['id']}")
         else:
-            print("⚠️ Gemini failed to generate text.")
+            print("⚠️ Gemini response was empty.")
 
     except Exception as e:
-        # هنا هيبان لو المشكلة 403 (صلاحيات) أو 401 (مفاتيح غلط)
+        # لو طلع 402 تاني، هقولك تعمل إيه في الـ Settings فورا
         print(f"❌ Error Detail: {str(e)}")
 
 if __name__ == "__main__":

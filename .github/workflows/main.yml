@@ -17,8 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas twitter-api-client
-
+          pip install pandas tweepy-self
       - name: Run bot
         env:
           TW_USER: ${{ secrets.TW_USER }}

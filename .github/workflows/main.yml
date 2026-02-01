@@ -18,7 +18,7 @@ jobs:
           python-version: '3.9'
 
       - name: Install dependencies
-        run: pip install huggingface_hub tweepy pandas
+        run: pip install ntwt pandas
 
       - name: Run bot
         env:

@@ -1,22 +1,32 @@
 import os
-import tweepy
+import pandas as pd
+from twitter_api_client import Twitter
+import time
 
-# إعداد تويتر v2
-client = tweepy.Client(
-    consumer_key=os.environ.get("TWITTER_API_KEY"),
-    consumer_secret=os.environ.get("TWITTER_API_SECRET"),
-    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
-    access_token_secret=os.environ.get("TWITTER_ACCESS_SECRET")
-)
+def start_bot():
+    try:
+        # هنا بنستخدم بيانات دخولك العادية (مش الـ API Keys)
+        # ضيف دول في الـ Secrets: TW_USER, TW_PASS, TW_EMAIL
+        username = os.environ.get("TW_USER")
+        password = os.environ.get("TW_PASS")
+        email = os.environ.get("TW_EMAIL")
 
-try:
-    print("🚀 Last attempt to bypass 402...")
-    # محاولة نشر نص بسيط جداً
-    client.create_tweet(text="Hello from my new bot!")
-    print("✅ Success!")
-except Exception as e:
-    if "402" in str(e):
-        print("❌ Confirmed: This Twitter account is LOCKED to a paid plan.")
-        print("💡 Solution: Create a new Twitter account and select 'Free Tier' only.")
-    else:
-        print(f"❌ Other Error: {str(e)}")
+        # المحاكاة بدأت
+        twitter = Twitter()
+        twitter.account.login(username, password, email)
+        
+        # قراءة البيانات
+        df = pd.read_csv('products.csv')
+        product_url = df['url'].iloc[0]
+        tweet_text = f"Amazing Tech Deal! 🔥\n{product_url}"
+
+        # النشر "كأنه متصفح"
+        twitter.account.tweet(tweet_text)
+        print("✅ SUCCESS! Posted via Browser Simulation (No API used).")
+
+    except Exception as e:
+        # لو ظهر خطأ هنا، مستحيل يكون 402، هيكون حاجة تانية هنحلها
+        print(f"❌ Browser Error: {str(e)}")
+
+if __name__ == "__main__":
+    start_bot()

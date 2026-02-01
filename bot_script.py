@@ -1,17 +1,9 @@
 import os
 import pandas as pd
-from huggingface_hub import InferenceClient
 import tweepy
 
-# 1. إعداد هجينج فيس (المجاني الحقيقي)
-# الموديل ده ذكي جداً وقوي في الروابط
-client_ai = InferenceClient(
-    "Qwen/Qwen2.5-72B-Instruct",
-    token=os.environ.get("HF_TOKEN")
-)
-
-# 2. إعداد تويتر (زي ما هي)
-client_twitter = tweepy.Client(
+# إعدادات تويتر فقط (الماكينة اللي بتنشر)
+client = tweepy.Client(
     consumer_key=os.environ.get("TWITTER_API_KEY"),
     consumer_secret=os.environ.get("TWITTER_API_SECRET"),
     access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
@@ -20,25 +12,21 @@ client_twitter = tweepy.Client(
 
 def start_bot():
     try:
+        # بنقرأ الداتا من ملفك
         df = pd.read_csv('products.csv')
-        product_link = df['url'].iloc[0] 
         
-        # طلب التويتة
-        prompt = f"Write a professional short tweet for this product: {product_link}. Use 2 emojis. Max 200 chars."
+        # بنجهز نص التويتة يدوي من غير ذكاء اصطناعي مؤقتاً
+        product_url = df['url'].iloc[0]
+        tweet_text = f"Check out this amazing deal! 🔥✨ \n\n{product_url} \n\n#Tech #Deals"
+
+        print(f"🚀 Trying to post to Twitter: {tweet_text}")
         
-        response = client_ai.chat_completion(
-            messages=[{"role": "user", "content": prompt}],
-            max_tokens=200
-        )
-        
-        tweet_text = response.choices[0].message.content.strip()
-        
-        print(f"🚀 Sending to Twitter via Hugging Face...")
-        post = client_twitter.create_tweet(text=tweet_text)
-        print(f"✅ Success! Tweet ID: {post.data['id']}")
+        # النشر
+        post = client.create_tweet(text=tweet_text)
+        print(f"✅ FINALLY! Posted with ID: {post.data['id']}")
 
     except Exception as e:
-        print(f"❌ Error Detail: {str(e)}")
+        print(f"❌ Error: {str(e)}")
 
 if __name__ == "__main__":
     start_bot()

@@ -1,29 +1,20 @@
 import os
 import pandas as pd
-import tweepy
-
-# إعدادات تويتر فقط (الماكينة اللي بتنشر)
-client = tweepy.Client(
-    consumer_key=os.environ.get("TWITTER_API_KEY"),
-    consumer_secret=os.environ.get("TWITTER_API_SECRET"),
-    access_token=os.environ.get("TWITTER_ACCESS_TOKEN"),
-    access_token_secret=os.environ.get("TWITTER_ACCESS_SECRET")
-)
+import ntwt # مكتبة للنشر المجاني بدون API Key رخم
 
 def start_bot():
     try:
-        # بنقرأ الداتا من ملفك
+        # قرأنا اللينك
         df = pd.read_csv('products.csv')
-        
-        # بنجهز نص التويتة يدوي من غير ذكاء اصطناعي مؤقتاً
         product_url = df['url'].iloc[0]
-        tweet_text = f"Check out this amazing deal! 🔥✨ \n\n{product_url} \n\n#Tech #Deals"
+        tweet_text = f"Amazing Tech Deal! 🔥\n{product_url}"
 
-        print(f"🚀 Trying to post to Twitter: {tweet_text}")
+        # النشر باستخدام اسم المستخدم وكلمة السر مباشرة (زي الموبايل)
+        # ملحوظة: هتحتاج تحط بياناتك في الـ Secrets
+        client = ntwt.Account(username=os.environ["nooneplus03"], password=os.environ["No0309#400"])
+        client.tweet(tweet_text)
         
-        # النشر
-        post = client.create_tweet(text=tweet_text)
-        print(f"✅ FINALLY! Posted with ID: {post.data['id']}")
+        print("✅ DONE! Posted without paying a cent to Elon Musk!")
 
     except Exception as e:
         print(f"❌ Error: {str(e)}")

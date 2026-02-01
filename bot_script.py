@@ -11,7 +11,7 @@ def start_bot():
 
         # النشر باستخدام اسم المستخدم وكلمة السر مباشرة (زي الموبايل)
         # ملحوظة: هتحتاج تحط بياناتك في الـ Secrets
-        client = ntwt.Account(username=os.environ["nooneplus03"], password=os.environ["No0309#400"])
+        client = ntwt.Account(username=os.environ["TW_USER"], password=os.environ["TW_PASS"])
         client.tweet(tweet_text)
         
         print("✅ DONE! Posted without paying a cent to Elon Musk!")

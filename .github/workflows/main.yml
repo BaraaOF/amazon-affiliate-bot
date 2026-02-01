@@ -1,7 +1,7 @@
 name: Twitter Browser Bot
 
 on:
-  workflow_dispatch: # عشان تشغله يدوي براحتك
+  workflow_dispatch:
 
 jobs:
   build:

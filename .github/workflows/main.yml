@@ -1,7 +1,6 @@
-name: Twitter Bot
-
+name: Twitter Browser Bot
 on:
-  workflow_dispatch: # عشان يظهر لك زرار Run workflow
+  workflow_dispatch:
 
 jobs:
   build:
@@ -15,12 +14,15 @@ jobs:
         with:
           python-version: '3.9'
 
-      - name: Install dependencies
-        run: pip install pandas tweepy
+      - name: Install Selenium & Chrome
+        run: |
+          pip install pandas selenium webdriver-manager
+          sudo apt-get update
+          sudo apt-get install -y google-chrome-stable
+
       - name: Run bot
         env:
-          TWITTER_API_KEY: ${{ secrets.TWITTER_API_KEY }}
-          TWITTER_API_SECRET: ${{ secrets.TWITTER_API_SECRET }}
-          TWITTER_ACCESS_TOKEN: ${{ secrets.TWITTER_ACCESS_TOKEN }}
-          TWITTER_ACCESS_SECRET: ${{ secrets.TWITTER_ACCESS_SECRET }}
+          TW_USER: ${{ secrets.TW_USER }}
+          TW_PASS: ${{ secrets.TW_PASS }}
+          TW_EMAIL: ${{ secrets.TW_EMAIL }}
         run: python bot_script.py

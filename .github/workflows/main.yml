@@ -17,7 +17,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          pip install pandas tweepy-self
+          pip install pandas ntwitter
       - name: Run bot
         env:
           TW_USER: ${{ secrets.TW_USER }}

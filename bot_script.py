@@ -1,59 +1,72 @@
 import os
 import pandas as pd
 import time
-import undetected_chromedriver as uc
+from selenium import webdriver
+from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.chrome.options import Options
+from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
 
 def start_bot():
-    options = uc.ChromeOptions()
-    options.add_argument('--headless') # لو لسه بيقف، جرب تشيل السطر ده وتجرب لوكال
-    options.add_argument('--no-sandbox')
-    
+    driver = None
     try:
-        driver = uc.Chrome(options=options)
-        print("🌐 Browser started (Undetected mode)...")
+        # إعدادات المتصفح للعمل داخل GitHub Actions
+        chrome_options = Options()
+        chrome_options.add_argument('--headless')
+        chrome_options.add_argument('--no-sandbox')
+        chrome_options.add_argument('--disable-dev-shm-usage')
+        chrome_options.add_argument("--window-size=1920,1080")
+        
+        print("🔧 Setting up ChromeDriver (Auto-matching versions)...")
+        service = Service(ChromeDriverManager().install())
+        driver = webdriver.Chrome(service=service, options=chrome_options)
+        
+        print("🌐 Opening Twitter login page...")
+        driver.get("https://x.com/i/flow/login")
+        time.sleep(10)
 
-        # فتح صفحة تسجيل الدخول
-        driver.get("https://x.com/login")
-        time.sleep(10) # زودنا الوقت عشان نضمن التحميل
-
-        # محاولة إيجاد خانة اليوزر بطريقة أكثر ذكاءً
+        # 1. إدخال اسم المستخدم
         print("🔑 Entering Username...")
         user_field = driver.find_element(By.XPATH, "//input[@autocomplete='username']")
         user_field.send_keys(os.environ.get("TW_USER"))
         user_field.send_keys(Keys.ENTER)
         time.sleep(5)
 
-        # خانة الباسورد
+        # 2. إدخال كلمة المرور
         print("🔑 Entering Password...")
         pass_field = driver.find_element(By.NAME, "password")
         pass_field.send_keys(os.environ.get("TW_PASS"))
         pass_field.send_keys(Keys.ENTER)
         time.sleep(10)
 
-        # قراءة الداتا والنشر
+        # 3. تجهيز التويتة من ملف الـ CSV
+        print("📝 Preparing Tweet...")
         df = pd.read_csv('products.csv')
-        tweet_text = f"Amazing Tech Deal! 🔥\n{df['url'].iloc[0]}"
+        # بنستخدم أول منتج في القائمة
+        tweet_text = f"Check this amazing deal! 🔥✨\n\n{df['url'].iloc[0]}"
         
-        # النشر المباشر عن طريق رابط التدوين
-        driver.get("https://x.com/intent/tweet?text=" + tweet_text)
-        time.sleep(5)
+        # الانتقال المباشر لصفحة النشر
+        driver.get(f"https://x.com/intent/tweet?text={tweet_text}")
+        time.sleep(7)
         
-        # الضغط على زر التغريد
+        # 4. الضغط على زر النشر
         print("🚀 Clicking Tweet button...")
         tweet_button = driver.find_element(By.XPATH, "//div[@data-testid='tweetButtonInline']")
         tweet_button.click()
         
-        print("✅ FINALLY! Posted successfully.")
+        print("✅ SUCCESS! Everything worked perfectly.")
         time.sleep(5)
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
-        # تصوير الشاشة لو حصل خطأ عشان نعرف المشكلة فين
-        driver.save_screenshot("error_screenshot.png")
+        print(f"❌ Error encountered: {str(e)}")
+        if driver:
+            print("📸 Saving error screenshot...")
+            driver.save_screenshot("error_log.png")
     finally:
-        driver.quit()
+        if driver:
+            print("🔒 Closing browser.")
+            driver.quit()
 
 if __name__ == "__main__":
     start_bot()

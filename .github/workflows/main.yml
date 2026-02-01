@@ -1,1 +1,1 @@
-run: pip install twitter-api-client pandas
+run: run: pip install twitter-api-client pandas

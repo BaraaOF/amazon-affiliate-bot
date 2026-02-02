@@ -4,36 +4,35 @@ import asyncio
 from twikit import Client
 
 async def main():
-    # إنشاء العميل مع تحديد روابط السيرفرات الجديدة
     client = Client('en-US')
     
+    # تحويل الكوكيز لصيغة المكتبة تفهمها
+    cookies = {
+        'auth_token': os.environ.get("AUTH_TOKEN"),
+        'ct0': os.environ.get("CT0"),
+        'kdt': 'unused' 
+    }
+
     try:
-        print("🔐 Attempting Login...")
-        # تسجيل الدخول
-        # ملحوظة: لو جالك 404 تاني، المكتبة دي محتاجة يوزر نيم بدون @
-        await client.login(
-            auth_info_1=os.environ.get("TW_USER"),
-            auth_info_2=os.environ.get("TW_EMAIL"),
-            password=os.environ.get("TW_PASS")
-        )
+        print("🍪 Logging in using Cookies...")
+        client.set_cookies(cookies)
         
-        # حفظ ملف الكوكيز عشان ميشكش فينا المرة الجاية
-        client.save_cookies('cookies.json')
-        print("✅ Login Successful & Cookies Saved!")
+        # تجربة هل الدخول نجح؟
+        user_info = await client.user()
+        print(f"✅ Welcome back, @{user_info.screen_name}!")
 
         # قراءة الداتا
         df = pd.read_csv('products.csv')
-        url = df['url'].iloc[0]
-        tweet_text = f"Hot Deal Alert! 🔥🔥\n\n{url}"
+        tweet_text = f"Flash Deal! 🔥🔥\n\n{df['url'].iloc[0]}"
 
         # النشر
-        print(f"🚀 Publishing Tweet...")
+        print("🚀 Posting Tweet...")
         await client.create_tweet(text=tweet_text)
-        print("✅ DONE! Check your Twitter account now!")
+        print("✅ SUCCESS! Posted via Cookie Session.")
 
     except Exception as e:
-        # لو المشكلة لسه في الـ 404، هنطبع تفاصيل أكتر
-        print(f"❌ Error Detail: {str(e)}")
+        print(f"❌ Cookie Error: {str(e)}")
+        print("💡 Hint: Check if your AUTH_TOKEN or CT0 are correct in Secrets.")
 
 if __name__ == "__main__":
     asyncio.run(main())

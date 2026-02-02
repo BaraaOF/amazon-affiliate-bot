@@ -1,4 +1,5 @@
-name: Twitter Browser Bot
+name: Twitter Fast Bot
+
 on:
   workflow_dispatch:
 
@@ -16,12 +17,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install pandas selenium webdriver-manager
-          
-      - name: Install Google Chrome
-        run: |
-          wget https://dl.google.com/linux/direct/google-chrome-stable_current_amd64.deb
-          sudo apt install ./google-chrome-stable_current_amd64.deb
+          pip install pandas twikit
 
       - name: Run bot
         env:
@@ -29,11 +25,3 @@ jobs:
           TW_PASS: ${{ secrets.TW_PASS }}
           TW_EMAIL: ${{ secrets.TW_EMAIL }}
         run: python bot_script.py
-
-      - name: Upload Logs
-        if: always()
-        uses: actions/upload-artifact@v4
-        with:
-          name: debug-package
-          path: |
-            error_log.png

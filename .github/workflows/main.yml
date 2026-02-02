@@ -1,4 +1,4 @@
-name: Twitter Fast Bot
+name: Twitter Cookie Bot
 
 on:
   workflow_dispatch:
@@ -21,7 +21,6 @@ jobs:
 
       - name: Run bot
         env:
-          TW_USER: ${{ secrets.TW_USER }}
-          TW_PASS: ${{ secrets.TW_PASS }}
-          TW_EMAIL: ${{ secrets.TW_EMAIL }}
+          AUTH_TOKEN: ${{ secrets.AUTH_TOKEN }}
+          CT0: ${{ secrets.CT0 }}
         run: python bot_script.py

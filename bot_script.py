@@ -9,7 +9,7 @@ async def main():
     
     try:
         print("🔐 Logging in to X...")
-        # تسجيل الدخول المباشر
+        # تسجيل الدخول المباشر باليوزر والإيميل والباسورد
         await client.login(
             auth_info_1=os.environ.get("TW_USER"),
             auth_info_2=os.environ.get("TW_EMAIL"),
@@ -17,7 +17,7 @@ async def main():
         )
         print("✅ Login Successful!")
 
-        # قراءة البيانات
+        # قراءة البيانات من ملف الـ CSV
         df = pd.read_csv('products.csv')
         tweet_text = f"Don't miss this! 🔥✨\n\n{df['url'].iloc[0]}"
 

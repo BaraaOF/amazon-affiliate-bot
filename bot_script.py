@@ -4,30 +4,36 @@ import asyncio
 from twikit import Client
 
 async def main():
-    # إعداد العميل
+    # إنشاء العميل مع تحديد روابط السيرفرات الجديدة
     client = Client('en-US')
     
     try:
-        print("🔐 Logging in to X...")
-        # تسجيل الدخول المباشر باليوزر والإيميل والباسورد
+        print("🔐 Attempting Login...")
+        # تسجيل الدخول
+        # ملحوظة: لو جالك 404 تاني، المكتبة دي محتاجة يوزر نيم بدون @
         await client.login(
             auth_info_1=os.environ.get("TW_USER"),
             auth_info_2=os.environ.get("TW_EMAIL"),
             password=os.environ.get("TW_PASS")
         )
-        print("✅ Login Successful!")
+        
+        # حفظ ملف الكوكيز عشان ميشكش فينا المرة الجاية
+        client.save_cookies('cookies.json')
+        print("✅ Login Successful & Cookies Saved!")
 
-        # قراءة البيانات من ملف الـ CSV
+        # قراءة الداتا
         df = pd.read_csv('products.csv')
-        tweet_text = f"Don't miss this! 🔥✨\n\n{df['url'].iloc[0]}"
+        url = df['url'].iloc[0]
+        tweet_text = f"Hot Deal Alert! 🔥🔥\n\n{url}"
 
         # النشر
-        print(f"🚀 Tweeting: {tweet_text}")
+        print(f"🚀 Publishing Tweet...")
         await client.create_tweet(text=tweet_text)
-        print("✅ DONE! Tweet posted successfully.")
+        print("✅ DONE! Check your Twitter account now!")
 
     except Exception as e:
-        print(f"❌ Error: {str(e)}")
+        # لو المشكلة لسه في الـ 404، هنطبع تفاصيل أكتر
+        print(f"❌ Error Detail: {str(e)}")
 
 if __name__ == "__main__":
     asyncio.run(main())
